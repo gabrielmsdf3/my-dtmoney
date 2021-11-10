@@ -1,10 +1,28 @@
-import { useEffect } from "react";
+import { Response } from "miragejs";
+import { useEffect, useState } from "react";
 import { api } from "../../services/axios";
 import { Container } from "./styles";
 
+interface Transaction {
+  id: number;
+  title: string;
+  amount: number;
+  type: string;
+  category: string;
+  createdAt: string;
+}
+
+interface TransactionRespons {
+  transactions: Transaction[];
+}
+
 export function TransactionsTable() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+
   useEffect(() => {
-    api.get("/transactions").then((response) => console.log(response.data));
+    api
+      .get<TransactionRespons>("transactions")
+      .then((response) => setTransactions(response.data.transactions));
   }, []);
   return (
     <Container>
@@ -18,18 +36,16 @@ export function TransactionsTable() {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>Desenvolvimento de website</td>
-            <td className="deposit">R$12.000</td>
-            <td>Desenvolvimento</td>
-            <td>19/10/2021</td>
-          </tr>
-          <tr>
-            <td>Aluguel</td>
-            <td className="withdraw">R$-1.100</td>
-            <td>Casa</td>
-            <td>17/10/2021</td>
-          </tr>
+          {transactions.map((transaction) => {
+            return (
+              <tr key={transaction.id}>
+                <td>{transaction.title}</td>
+                <td className={transaction.type}>{transaction.amount}</td>
+                <td>{transaction.category}</td>
+                <td>{transaction.createdAt}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </Container>
